@@ -31,14 +31,16 @@ type UserDataEventType string
 
 // Client define API client
 type Client struct {
-	APIKey     string
-	SecretKey  string
-	BaseURL    string
-	HTTPClient *http.Client
-	Debug      bool
-	Logger     *log.Logger
-	TimeOffset int64
-	do         doFunc
+	APIKey       string
+	SecretKey    string
+	BaseURL      string
+	HTTPClient   *http.Client
+	Debug        bool
+	Logger       *log.Logger
+	TimeOffset   int64
+	do           doFunc
+	edPrivateKey ed25519.PrivateKey
+	useEd25519   bool
 }
 
 type doFunc func(req *http.Request) (*http.Response, error)
@@ -85,6 +87,17 @@ func NewClient(apiKey string, secretKey string, baseURL ...string) *Client {
 		HTTPClient: http.DefaultClient,
 		Logger:     log.New(os.Stderr, Name, log.LstdFlags),
 	}
+}
+
+func NewClientWithEd25519(apiKey string, privateKeyPEM string, baseURL string) (*Client, error) {
+	privKey := handlers.ParseEd25519PEM(privateKeyPEM)
+
+	return &Client{
+		APIKey:       apiKey,
+		BaseURL:      baseURL,
+		edPrivateKey: privKey,
+		useEd25519:   true,
+	}, nil
 }
 
 func (c *Client) parseRequest(r *request, opts ...RequestOption) (err error) {
