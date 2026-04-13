@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 type secType int
@@ -41,20 +42,46 @@ type request struct {
 }
 
 // addParam add param with key/value to query string
+// func (r *request) addParam(key string, value interface{}) *request {
+// 	if r.query == nil {
+// 		r.query = url.Values{}
+// 	}
+// 	r.query.Add(key, fmt.Sprintf("%v", value))
+// 	return r
+// }
+
 func (r *request) addParam(key string, value interface{}) *request {
 	if r.query == nil {
 		r.query = url.Values{}
 	}
-	r.query.Add(key, fmt.Sprintf("%v", value))
+	switch v := value.(type) {
+	case float64:
+		r.query.Add(key, strconv.FormatFloat(v, 'f', -1, 64))
+	default:
+		r.query.Add(key, fmt.Sprintf("%v", value))
+	}
 	return r
 }
 
 // setParam set param with key/value to query string
+// func (r *request) setParam(key string, value interface{}) *request {
+// 	if r.query == nil {
+// 		r.query = url.Values{}
+// 	}
+// 	r.query.Set(key, fmt.Sprintf("%v", value))
+// 	return r
+// }
+
 func (r *request) setParam(key string, value interface{}) *request {
 	if r.query == nil {
 		r.query = url.Values{}
 	}
-	r.query.Set(key, fmt.Sprintf("%v", value))
+	switch v := value.(type) {
+	case float64:
+		r.query.Set(key, strconv.FormatFloat(v, 'f', -1, 64))
+	default:
+		r.query.Set(key, fmt.Sprintf("%v", value))
+	}
 	return r
 }
 
